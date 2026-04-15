@@ -78,11 +78,14 @@ app.post('/pdf', async (req, res) => {
     // Pausa adicional para que React hidrate completamente
     await new Promise(r => setTimeout(r, 2000))
 
-    const pdf = await page.pdf({
+    const pdfRaw = await page.pdf({
       format: 'Letter',
       printBackground: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' },
     })
+
+    // puppeteer v24+ devuelve Uint8Array — convertir a Buffer para Express
+    const pdf = Buffer.from(pdfRaw)
 
     res.set({
       'Content-Type': 'application/pdf',
