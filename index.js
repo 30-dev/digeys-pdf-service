@@ -20,7 +20,8 @@ async function getBrowser() {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-gpu',
-      '--no-zygote',
+      '--disable-extensions',
+      '--no-first-run',
     ],
   })
   browser.on('disconnected', () => { browser = null })
@@ -98,13 +99,7 @@ app.post('/pdf', async (req, res) => {
 })
 
 // ── Iniciar servidor
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`PDF Service listening on :${PORT}`)
-  // Pre-calentar el browser al arrancar
-  try {
-    await getBrowser()
-    console.log('Browser ready')
-  } catch (e) {
-    console.error('Browser failed to launch:', e.message)
-  }
+  // Browser se inicia en el primer request — no pre-calentar al arrancar
 })
