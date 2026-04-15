@@ -70,12 +70,18 @@ app.post('/pdf', async (req, res) => {
     })
 
     await page.goto(url, {
-      waitUntil: 'networkidle0',  // espera a que carguen las fuentes de Google
+      waitUntil: 'domcontentloaded',
       timeout: 60_000,
     })
 
-    // Esperar a que React haya montado y el componente esté listo
-    await page.waitForSelector('[data-ready="true"]', { timeout: 30_000 })
+    // Esperar a que Next.js hidrate y el componente esté en el DOM
+    // networkidle0 bloquea por las fuentes de Google — usamos selector + fallback
+    try {
+      await page.waitForSelector('[data-ready="true"]', { timeout: 15_000 })
+    } catch {
+      // Si no aparece el selector, esperamos un momento y continuamos igual
+      await new Promise(r => setTimeout(r, 3000))
+    }
 
     const pdf = await page.pdf({
       format: 'Letter',
