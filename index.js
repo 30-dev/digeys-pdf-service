@@ -28,18 +28,18 @@ async function getBrowser() {
   return browser
 }
 
-// ── Middleware de autenticación
+// ── Health check — ANTES del middleware de auth para que Railway lo alcance
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, browser: !!browser })
+})
+
+// ── Middleware de autenticación (aplica a /pdf y demás rutas)
 app.use((req, res, next) => {
   if (!API_KEY) return next()  // sin key configurada, modo dev abierto
   if (req.headers['x-api-key'] !== API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   next()
-})
-
-// ── Health check (Railway lo usa para saber si el servicio está vivo)
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, browser: !!browser })
 })
 
 // ── Endpoint principal: recibe URL → devuelve PDF
